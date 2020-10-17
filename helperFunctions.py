@@ -441,6 +441,8 @@ class ConversionHelper:
         deg_per_px_lat = row_ref.iloc[0]['deg_per_px_lat']
         deg_per_px_lon = row_ref.iloc[0]['deg_per_px_lon']
 
+        lat = lat + 43 * math.floor(lat / row_ref.iloc[0]['input_size'])
+
         lat_deg = row_ref.iloc[0]['lat_0'] - lat * deg_per_px_lat
         lon_deg = row_ref.iloc[0]['lon_0'] + lon * deg_per_px_lon
 
@@ -475,18 +477,31 @@ class TestingHelper:
     def __init__(self):
         None
 
-    def show_point_in_img(self, cnv: ConversionHelper, lat: float, lon: float, image_ref: str,  row_ref: any) -> None:
+    def show_point_in_img(self, cnv: ConversionHelper, lat: float, lon: float, image_ref: str,  row_ref: any) -> (int, int):
 
         img = cv2.imread(image_ref)
         fig, ax = plt.subplots(figsize=(15, 185))
         lat_px, lon_px = cnv.point_deg_to_px(lat, lon, row_ref)
 
-        point = plt.Circle((lat_px, lon_px), 5, color='b')
+        point = plt.Circle((lon_px, lat_px), 5, color='b')
         ax.add_artist(point)
 
         ax.imshow(img)
 
-        return None
+        return lat_px, lon_px
+
+    def show_point_in_img_to_deg(self, cnv: ConversionHelper, lat: int, lon: int, image_ref: str,  row_ref: any) -> (float, float):
+
+        img = cv2.imread(image_ref)
+        fig, ax = plt.subplots(figsize=(15, 185))
+        lat_deg, lon_deg = cnv.point_px_to_deg(lat, lon, row_ref)
+
+        point = plt.Circle((lon, lat), 5, color='b')
+        ax.add_artist(point)
+
+        ax.imshow(img)
+
+        return lat_deg, lon_deg
 
 
 class MapsImage:
