@@ -187,7 +187,7 @@ class BigQueryHelper:
 
         df['polygon'] = ""
         for index, row in df.iterrows():
-            if ((row['boundary_lon'] != '' and row['boundary_lat'] != '') and row['boundary_lat'].isnull() == False and row['boundary_lat'].isnull() == False:
+            if (row['boundary_lon'] != '' and row['boundary_lat'] != '' and row['boundary_lat'].isnull() == False and row['boundary_lat'].isnull() == False):
                 lon = json.loads(row['boundary_lon'])
                 lat = json.loads(row['boundary_lat'])
                 df.at[index, 'polygon'] = Polygon(zip(lon, lat))
