@@ -49,7 +49,7 @@ class BigQueryHelper:
          """
 
         df = pandas_gbq.read_gbq(
-            'SELECT * FROM sidhouses.osm_data.maps_images')
+            'SELECT * FROM `sidhouses.osm_data.maps_images`', project_id='sidhouses')
         return df
 
     # ___SID BUILDINGS___
@@ -78,7 +78,7 @@ class BigQueryHelper:
          """
 
         df = pandas_gbq.read_gbq(
-            'SELECT * FROM sidhouses.output_data.buildings')
+            'SELECT * FROM sidhouses.output_data.buildings', project_id='sidhouses')
         self.create_polygons(df)
         self.create_points(df)
         return df
@@ -108,7 +108,7 @@ class BigQueryHelper:
              Returns a DataFrame with all the buildings
          """
 
-        df = pandas_gbq.read_gbq('SELECT * FROM sidhouses.osm_data.buildings')
+        df = pandas_gbq.read_gbq('SELECT * FROM sidhouses.osm_data.buildings', project_id='sidhouses')
         self.create_polygons(df)
         self.create_points(df)
         return df
@@ -187,7 +187,7 @@ class BigQueryHelper:
 
         df['polygon'] = ""
         for index, row in df.iterrows():
-            if (row['boundary_lon'] != '' and row['boundary_lat'] != ''):
+            if ((row['boundary_lon'] != '' and row['boundary_lat'] != '') or (!row['boundary_lat'].isnull() and !row['boundary_lat'].isnull()):
                 lon = json.loads(row['boundary_lon'])
                 lat = json.loads(row['boundary_lat'])
                 df.at[index, 'polygon'] = Polygon(zip(lon, lat))
