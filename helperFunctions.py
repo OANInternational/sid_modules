@@ -79,7 +79,7 @@ class BigQueryHelper:
 
         df = pandas_gbq.read_gbq(
             'SELECT * FROM sidhouses.output_data.buildings', project_id='sidhouses')
-        self.create_polygons(df)
+        # self.create_polygons(df)
         self.create_points(df)
         return df
 
@@ -109,7 +109,7 @@ class BigQueryHelper:
          """
 
         df = pandas_gbq.read_gbq('SELECT * FROM sidhouses.osm_data.buildings', project_id='sidhouses')
-        self.create_polygons(df)
+        # self.create_polygons(df)
         self.create_points(df)
         return df
 
@@ -186,8 +186,10 @@ class BigQueryHelper:
          """
 
         df['polygon'] = ""
+        df['boundary_lon'].fillna('')
+        df['boundary_lat'].fillna('')
         for index, row in df.iterrows():
-            if (row['boundary_lon'] != '' and row['boundary_lat'] != '' and row['boundary_lat'].isnull() == False and row['boundary_lat'].isnull() == False):
+            if (row['boundary_lon'] != '' and row['boundary_lat'] != ''):
                 lon = json.loads(row['boundary_lon'])
                 lat = json.loads(row['boundary_lat'])
                 df.at[index, 'polygon'] = Polygon(zip(lon, lat))
@@ -438,13 +440,13 @@ class ConversionHelper:
             lon_deg (float): longitud in Deg
         """
 
-        deg_per_px_lat = row_ref.iloc[0]['deg_per_px_lat']
-        deg_per_px_lon = row_ref.iloc[0]['deg_per_px_lon']
+        deg_per_px_lat = row_ref['deg_per_px_lat']
+        deg_per_px_lon = row_ref['deg_per_px_lon']
 
-        lat = lat + 43 * math.floor(lat / row_ref.iloc[0]['input_size'])
+        lat = lat + 43 * math.floor(lat / row_ref['input_size'])
 
-        lat_deg = row_ref.iloc[0]['lat_0'] - lat * deg_per_px_lat
-        lon_deg = row_ref.iloc[0]['lon_0'] + lon * deg_per_px_lon
+        lat_deg = row_ref['lat_0'] - lat * deg_per_px_lat
+        lon_deg = row_ref['lon_0'] + lon * deg_per_px_lon
 
         return lat_deg, lon_deg
 
@@ -461,14 +463,14 @@ class ConversionHelper:
             lon_px (int): longitud in Px
         """
 
-        deg_per_px_lat = row_ref.iloc[0]['deg_per_px_lat']
-        deg_per_px_lon = row_ref.iloc[0]['deg_per_px_lon']
+        deg_per_px_lat = row_ref['deg_per_px_lat']
+        deg_per_px_lon = row_ref['deg_per_px_lon']
 
-        lat_px = (row_ref.iloc[0]['lat_0'] - lat) / deg_per_px_lat
-        lon_px = (lon - row_ref.iloc[0]['lon_0']) / deg_per_px_lon
+        lat_px = (row_ref['lat_0'] - lat) / deg_per_px_lat
+        lon_px = (lon - row_ref['lon_0']) / deg_per_px_lon
 
         lat_px = lat_px - 43 * \
-            math.floor(lat_px / row_ref.iloc[0]['input_size'])
+            math.floor(lat_px / row_ref['input_size'])
         return lat_px, lon_px
 
 
@@ -503,6 +505,17 @@ class TestingHelper:
 
         return lat_deg, lon_deg
 
+    def show_points_in_img(self, cnv: ConversionHelper, lats: any, lons: any, image_ref: str,  row_ref: any, color: str) -> None:
+        
+        img = cv2.imread(image_ref)
+        fig, ax = plt.subplots(figsize=(15, 185))
+
+        for i in range(len(lats)):
+            lat_px, lon_px = cnv.point_deg_to_px(lats[i], lons[i], row_ref)
+            point = plt.Circle((lon_px, lat_px), 5, color=color)
+            ax.add_artist(point)
+
+        ax.imshow(img)
 
 class MapsImage:
     """ Image in BigQuery Table
