@@ -186,8 +186,8 @@ class BigQueryHelper:
          """
 
         df['polygon'] = ""
-        df['boundary_lon'].fillna('')
-        df['boundary_lat'].fillna('')
+        df['boundary_lon'].fillna('', inplace=True)
+        df['boundary_lat'].fillna('', inplace=True)
         for index, row in df.iterrows():
             if (row['boundary_lon'] != '' and row['boundary_lat'] != ''):
                 lon = json.loads(row['boundary_lon'])
